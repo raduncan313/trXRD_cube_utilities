@@ -23,19 +23,19 @@ d13s_01m9 = load_and_preprocess(cubedir, r13s_01m9, th, t0 + 0.05, '01m9 13 mJpc
 
 %%
 d = d1s_01m9;
-d = roi_mask(d);
-f = plot_sigs(d, cmap);
-write_sigs_to_csv(d, 'sigs/');
+d1 = roi_mask(d);
+f = plot_sigs(d);
+% write_sigs_to_csv(d, 'sigs/');
 % f = figure;
 % ax = gca;
 % leg = legend;
-% plot_sigs_to_axis(d, ax, leg);
-% plot_sigs_to_axis(d, ax, leg);
-% leg.String
-% figure
-% ax = gca;
-% plot_sig_to_axis({d, d1}, ax, 0, cmap);
-
+% % plot_sigs_to_axis(d, ax, leg);
+% ds = {d, d1};
+% for ii = 1:length(ds)
+%     dd = ds{ii};
+%     plot_sigs_to_axis(dd, ax, leg)
+% end
+d = clear_masks(d);
 %% Functions
 
 function d = load_and_preprocess(cubedir, runs, th, t0, info, col_ind)
