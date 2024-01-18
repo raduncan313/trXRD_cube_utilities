@@ -1,4 +1,0 @@
-function d = clear_masks(d)
-    if 
-    d = rmfield(d, 'masks');
-end
