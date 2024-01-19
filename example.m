@@ -24,7 +24,7 @@ d13s_01m9 = load_and_preprocess(cubedir, r13s_01m9, th, t0 + 0.05, '01m9 13 mJpc
 %%
 d = d1s_01m9;
 
-[fs, d] = plot_rois(d, 3)
+[f, d1] = plot_rois(d, 3)
 
 %% Functions
 

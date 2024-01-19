@@ -24,10 +24,6 @@ function [d, varargout] = roi_mask(d, varargin)
     imgs_mask_on = d.on.imgs.*mask3D;
     imgs_mask_off = d.off.imgs.*mask3D;
     sig = squeeze(sum(imgs_mask_on, [1,2]))./mean(squeeze(sum(imgs_mask_off, [1,2])));
-
-    if ~isfield(d, 'masks')
-        d.masks = {};
-    end
     
     mask.mask = mask2D;
     mask.type = 'ROI';
