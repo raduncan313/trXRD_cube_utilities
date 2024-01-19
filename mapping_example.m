@@ -55,7 +55,7 @@ scan_range = linspace(-4, 4, length(cube(1,1,:)));
 scan_angle = 'phi';
 threshs = [40 1000];
 
-hkl_scatter = map_huber_anglescan_to_hkl(cube, ROI_lims, scan_angle, scan_range, threshs, geometry);
+hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle, scan_range, threshs, geometry);
 scatter3(hkl_scatter(:,1),hkl_scatter(:,2),hkl_scatter(:,3),10*ones(length(hkl_scatter(:,1)),1),hkl_scatter(:,5),'filled')
 xlabel('h')
 ylabel('k')
