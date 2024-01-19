@@ -1,8 +1,0 @@
-function [fs, d] = plot_rois(d, n)
-
-    d = clear_masks(d);
-    
-    for ii = 1:n
-        
-    end
-end
