@@ -1,6 +1,7 @@
 clear all
 close all
 
+addpath(genpath('xdscode'))
 load r129.mat
 [P, tau_p, attypes_p, atnums_p] = readPOSCAR('TaSe42I_sm_isp_sd_1502042_springermaterials.vasp');
 
