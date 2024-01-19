@@ -1,4 +1,4 @@
-function [d, varargout] = roi_mask(d, varargin)
+function [d, f] = roi_mask(d, varargin)
 
     if ~isfield(d, 'masks')
         d.masks = {};
@@ -7,18 +7,24 @@ function [d, varargout] = roi_mask(d, varargin)
     imsum = sum(d.off.imgs, 3);
     if nargin == 1
         f = figure;
-        im = imagesc(imsum);
-        hold on
-        set(gca, 'colorscale', 'log');
         title('Select ROI')
+    im = imagesc(imsum);
+    hold on
+    set(gca, 'colorscale', 'log');
     else
         f = varargin{1};
         figure(f);
-        hold on
+    end
+    
+    for ii = 1:length(d.masks)
+        m = d.masks{ii};
+        if strcmp(m.type, 'ROI')
+            plot(m.roi(:,1), m.roi(:,2));
+        end
     end
     
     [mask2D, x, y] = roipoly;
-    plot(x, y, 'linewidth', 2);
+    plot(x, y, 'color', 'red')
 
     mask3D = repmat(mask2D, [1,1,length(d.off.scan_var)]);
     imgs_mask_on = d.on.imgs.*mask3D;
@@ -34,10 +40,4 @@ function [d, varargout] = roi_mask(d, varargin)
     mask.roi = [x y];
     mask.sig = sig;
     d.masks{end+1} = mask;
-    
-    if nargout == 2
-        varargout{1} = f;
-    else
-        close(f);
-    end
 end

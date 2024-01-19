@@ -23,8 +23,26 @@ d13s_01m9 = load_and_preprocess(cubedir, r13s_01m9, th, t0 + 0.05, '01m9 13 mJpc
 
 %%
 d = d1s_01m9;
+n = 3;
 
-[fs, d] = plot_rois(d, 3)
+d = clear_masks(d);
+f2 = figure;
+hold on
+
+for ii = 1:n
+    if ii == 1:
+        [d, f1] = roi_mask(d);
+    else
+        [d, f1] = roi_mask(d, f1);
+    end
+    
+    figure(f2);
+    plot(d.on.scan_var, d)
+end
+
+
+for ii = 1:n
+end
 
 %% Functions
 
