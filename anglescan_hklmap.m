@@ -161,7 +161,8 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
         
         s_out = pagemtimes(Rs, repmat((Rot_D(delta,nu))*s_in, [1,1,npx]));
         s_diff = s_out - s_in;
-        s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi,mu)*SamRot, [1,1,npx]), s_diff); %TODO
+%         s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi,mu)*SamRot, [1,1,npx]), s_diff); % needs Matlab2022a
+        s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi,mu)*SamRot, [1,1,npx]), s_diff);
         hkl = squeeze(permute(pagemtimes(geometry.realvecs, s_diff_crystal), [3 1 2]));
         
 %         hkl_scatter = zeros(npx, 5);
