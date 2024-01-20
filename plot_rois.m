@@ -1,7 +1,6 @@
 function [f, d] = plot_rois(d, n)
 
     d = clear_masks(d);
-
     for ii = 1:n
         if ii == 1
             [d, f] = roi_mask(d);

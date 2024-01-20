@@ -9,7 +9,5 @@ function plot_sigs_to_axis(d, ax, leg)
         leg_str{end+1} = sprintf('%1$s mask %2$d', d.info, ii);
     end
     
-    xlabel('Delay (ps)', 'interpreter', 'latex')
-    ylabel('$I(t)/I_{\mathrm{off}}$', 'interpreter', 'latex')
     set(leg, 'string', leg_str)
 end

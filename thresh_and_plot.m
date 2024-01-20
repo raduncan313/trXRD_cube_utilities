@@ -1,3 +1,14 @@
+function [f, d] = thresh_and_plot(d, th)
+    d = clear_masks(d);
+    d = thresh_mask(d, th);
+
+    f = figure
+    plot(d.on.scan_var, d.masks{1}.sig, 'LineWidth', 1.5);
+    xlabel('Time (ps)')
+    ylabel('Intensity (norm.)')
+    title(sprintf('%1$s: th = %2$f', d.info, d.masks{1}.th))
+end
+
 function d = thresh_mask(d, th)
     imoff = sum(d.off.imgs, 3);
     imoff = imoff/max(imoff(:));
