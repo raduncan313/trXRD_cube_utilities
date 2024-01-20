@@ -62,5 +62,3 @@ xlabel('h')
 ylabel('k')
 zlabel('l')
 axis vis3d
-
-

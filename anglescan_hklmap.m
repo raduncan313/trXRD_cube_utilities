@@ -58,6 +58,7 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
 %     x-ray wavevector relative to the detector surface normal, to yield
 %     values proportional to the x-ray fluence incident on the pixel.
 
+    tic
     % Detector distance and pixel size
     L_det = geometry.detector.det_dist; % in millimeters
     l_pix_h = geometry.detector.det_size_horz / geometry.detector.det_pixels_horz; % in millimeters
@@ -90,7 +91,6 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
     b = geometry.realvecs(2,2);
     c = geometry.realvecs(3,3);
     
-    tic
     for ii = 1:length(cube(1,1,:))
         if strcmp(scan_angle, 'theta')
             theta = geometry.theta + scan_range(ii);
@@ -113,42 +113,33 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
             chi = geometry.chi;
             mu = geometry.mu + scan_range(ii);
         end
-        disp([num2str(100*ii/length(cube(1,1,:))) '%'])
+        % disp([num2str(100*ii/length(cube(1,1,:))) '%'])
         
-        HV = zeros(ROI_size, 2);
+        HV = zeros(2, ROI_size);
         intens = zeros(ROI_size, 1);
         kk = 1;
         for hh = ROI_lim_h(1):ROI_lim_h(2)
             for vv = ROI_lim_v(1):ROI_lim_v(2)
                 if (cube(hh,vv,ii) > threshs(1) && cube(hh,vv,ii) < threshs(2))
-                    HV(kk, :) = [hh vv];
+                    HV(:, kk) = [hh vv]';
                     intens(kk) = cube(hh,vv,ii);
                     kk = kk + 1;  
                 end
             end
         end
         npx = kk - 1;
-        HV = HV(1:npx,:);
+        HV = HV(:,1:npx);
         if isempty(HV)
             continue
         end
         intens = intens(1:npx);
-        hvc = [h_ind_c, v_ind_c];
-        l_pix = [l_pix_h, l_pix_v];
+        hvc = [h_ind_c, v_ind_c]';
+        l_pix = [l_pix_h, l_pix_v]';
         R_det = L_det*Rot_D(delta, nu)*xunit;
-        L_pix = vecnorm((HV - hvc).*l_pix, 2, 2);
-%         Rot_D(delta, nu)
-%         L_det
-%         xunit'
-%         HV
-%         hvc
-%         l_pix
-%         yunit
-%         zunit
-        R_pix = Rot_D(delta, nu)*(L_det*xunit + [-yunit, -zunit]*((HV - hvc).*l_pix)');
-%         L_pix = vecnorm(R_pix - R_det, 2, 2);
+        R_pix = Rot_D(delta, nu)*(L_det*xunit + [-yunit, -zunit]*((HV - hvc).*l_pix));
+        L_pix = vecnorm(R_pix - R_det, 2, 1)';
         gamma = atand(L_pix./L_det);
-        ax = cross(R_det, R_pix, 1);
+        ax = cross(repmat(R_det, [1,npx]), R_pix, 1);
         ax = ax./vecnorm(ax, 2, 1);
         
         Rs = zeros(3,3,npx);
@@ -161,41 +152,14 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
         
         s_out = pagemtimes(Rs, repmat((Rot_D(delta,nu))*s_in, [1,1,npx]));
         s_diff = s_out - s_in;
-%         s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi,mu)*SamRot, [1,1,npx]), s_diff); % needs Matlab2022a
         s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi,mu)*SamRot, [1,1,npx]), s_diff);
         hkl = squeeze(permute(pagemtimes(geometry.realvecs, s_diff_crystal), [3 1 2]));
         
-%         hkl_scatter = zeros(npx, 5);
         hkl_scatter_0(p:p+npx-1,1:3) = hkl;
         hkl_scatter_0(p:p+npx-1,4) = intens./cosd(gamma);
         hkl_scatter_0(p:p+npx-1,5) = scan_range(ii);
         p = p + npx;
         
-%         for hh = ROI_lim_h(1):ROI_lim_h(2)
-%             for vv = ROI_lim_v(1):ROI_lim_v(2)
-%                 if (cube(hh,vv,ii) < threshs(1) || cube(hh,vv,ii) > threshs(2))
-%                     continue
-%                 else
-%                     R_det = L_det*Rot_D(delta,nu)*xunit;
-%                     L_pix = sqrt(((hh - h_ind_c)*l_pix_h)^2 + ((vv - v_ind_c)*l_pix_v)^2);
-%                     R_pix = Rot_D(delta,nu)*(L_det*xunit +...
-%                         (hh - h_ind_c)*l_pix_h*(-yunit) + (vv - v_ind_c)*l_pix_v*(-zunit));
-%                     gamma = atand(L_pix/L_det);
-%                     ax = cross(R_det, R_pix) / norm(cross(R_det, R_pix));
-%                     s_out = rotationmat3D(gamma,ax)*Rot_D(delta,nu)*s_in;
-%                 end
-% 
-%                 s_diff = s_out - s_in;
-%                 s_diff_crystal = (Rot_S(phi,theta,chi,mu)*SamRot)\s_diff;
-%                 hkl = geometry.realvecs*s_diff_crystal;
-%                 hkl_scatter_0(p,1) = hkl(1);
-%                 hkl_scatter_0(p,2) = hkl(2);
-%                 hkl_scatter_0(p,3) = hkl(3);
-%                 hkl_scatter_0(p,4) = cube(hh,vv,ii) / cosd(gamma);
-%                 hkl_scatter_0(p,5) = scan_range(ii);
-%                 p = p + 1;
-%             end
-%         end
     end
     hkl_scatter = hkl_scatter_0(1:p-1,:);
     toc
