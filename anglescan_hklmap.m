@@ -66,13 +66,15 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
     L_det = geometry.detector.det_dist; % in millimeters
     l_pix_h = geometry.detector.det_size_horz / geometry.detector.det_pixels_horz; % in millimeters
     l_pix_v = geometry.detector.det_size_vert / geometry.detector.det_pixels_vert; % in millimeters
-    
+    l_pix = [l_pix_h, l_pix_v]';
+
     ROI_lim_h = ROI_lims{1};
     ROI_lim_v = ROI_lims{2};
     ROI_size = (ROI_lim_h(2) - ROI_lim_h(1) + 1)*(ROI_lim_v(2) - ROI_lim_v(1) + 1);
     
     h_ind_c = geometry.beam_center(1);
     v_ind_c = geometry.beam_center(2);
+    hvc = [h_ind_c, v_ind_c]';
     
     lambda = geometry.lambda0;
     xunit = [1 0 0]';
@@ -148,9 +150,7 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
         if isempty(HV)
             continue
         end
-        intens = intens(1:npx);
-        hvc = [h_ind_c, v_ind_c]';
-        l_pix = [l_pix_h, l_pix_v]';
+        intens = intens(1:npx);        
         R_det = L_det*Rot_D(delta, nu)*xunit;
         R_pix = Rot_D(delta, nu)*(L_det*xunit + [-yunit, -zunit]*((HV - hvc).*l_pix));
         L_pix = vecnorm(R_pix - R_det, 2, 1)';
@@ -173,8 +173,7 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
         else
             s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi)*SamRot, [1,1,npx]), s_diff);
         end
-        hkl = squeeze(permute(pagemtimes(geometry.realvecs, s_diff_crystal), [3 1 2]));
-        
+        hkl = squeeze(permute(pagemtimes(geometry.realvecs, s_diff_crystal), [3 1 2]));        
         hkl_scatter_0(p:p+npx-1,1:3) = hkl;
         hkl_scatter_0(p:p+npx-1,4) = intens./cosd(gamma);
         hkl_scatter_0(p:p+npx-1,5) = scan_range(ii);
