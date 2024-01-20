@@ -115,27 +115,60 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
         end
         disp([num2str(100*ii/length(cube(1,1,:))) '%'])
         
-        HV = zeros(ROI_size, 2);        
+        HV = zeros(ROI_size, 2);
+        intens = zeros(ROI_size, 1);
         kk = 1;
         for hh = ROI_lim_h(1):ROI_lim_h(2)
             for vv = ROI_lim_v(1):ROI_lim_v(2)
                 if (cube(hh,vv,ii) > threshs(1) && cube(hh,vv,ii) < threshs(2))
                     HV(kk, :) = [hh vv];
+                    intens(kk) = cube(hh,vv,ii);
                     kk = kk + 1;  
                 end
             end
         end
-        HV = HV(1:kk-1,:);
+        npx = kk - 1;
+        HV = HV(1:npx,:);
+        if isempty(HV)
+            continue
+        end
+        intens = intens(1:npx);
         hvc = [h_ind_c, v_ind_c];
         l_pix = [l_pix_h, l_pix_v];
         R_det = L_det*Rot_D(delta, nu)*xunit;
         L_pix = vecnorm((HV - hvc).*l_pix, 2, 2);
-        R_pix = Rot_D(delta, nu)*(L_det*xunit' + ((HV - hvc).*l_pix)*[-yunit, -zunit]')
+%         Rot_D(delta, nu)
+%         L_det
+%         xunit'
+%         HV
+%         hvc
+%         l_pix
+%         yunit
+%         zunit
+        R_pix = Rot_D(delta, nu)*(L_det*xunit + [-yunit, -zunit]*((HV - hvc).*l_pix)');
 %         L_pix = vecnorm(R_pix - R_det, 2, 2);
         gamma = atand(L_pix./L_det);
-        ax = cross(R_det, R_pix, 2);
-        ax = ax/norm(ax);
+        ax = cross(R_det, R_pix, 1);
+        ax = ax./vecnorm(ax, 2, 1);
         
+        Rs = zeros(3,3,npx);
+        for jj = 1:npx
+            gam = gamma(jj);
+            axx = ax(:, jj);
+            R = rotationmat3D(gam, axx);
+            Rs(:,:,jj) = R;
+        end
+        
+        s_out = pagemtimes(Rs, repmat((Rot_D(delta,nu))*s_in, [1,1,npx]));
+        s_diff = s_out - s_in;
+        s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi,mu)*SamRot, [1,1,npx]), s_diff); %TODO
+        hkl = squeeze(permute(pagemtimes(geometry.realvecs, s_diff_crystal), [3 1 2]));
+        
+%         hkl_scatter = zeros(npx, 5);
+        hkl_scatter_0(p:p+npx-1,1:3) = hkl;
+        hkl_scatter_0(p:p+npx-1,4) = intens./cosd(gamma);
+        hkl_scatter_0(p:p+npx-1,5) = scan_range(ii);
+        p = p + npx;
         
 %         for hh = ROI_lim_h(1):ROI_lim_h(2)
 %             for vv = ROI_lim_v(1):ROI_lim_v(2)
