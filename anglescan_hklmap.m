@@ -122,7 +122,7 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
             end
         elseif strcmp(scan_angle, 'mu')
             if mattype == 2
-                error('No `mu` angle for sixcircle diffractometers.')
+                error('No `mu` angle for fourcircle matrix.')
             end
             theta = geometry.theta;
             phi = geometry.phi;
