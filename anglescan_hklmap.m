@@ -7,23 +7,21 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
 %     This function takes a (huber) angle scan cube and returns an
 %     hkl-mapping for each pixel
 % 
-%     INPUTS:
-%     cube: A 3D array containing the angle scan data. First index
+%     INPUTS: cube: A 3D array containing the angle scan data. First index
 %     is horizontal, second index is vertical, third index is 'scan_range'
-%     index.
-%     Care must be taken regarding the orientation of the detector with
-%     respect to the indexing of 'cube'. The convention of this function is
-%     the standard xdscode convention where the x-axis is the incident
-%     x-ray direction, the z-axis points vertically up, and the y-axis
-%     completes the right-handed coordinate system. When the detector
-%     angles 'delta' and 'nu' are zero the incident x-rays point directly at
-%     the detector. If I am at the sample facing the detector in this
-%     configuration, the relationship between the detector orientation and
-%     the cube indices is given by the following:
-%         - values 'cube(1,1,:)' are at the top-left
-%         - values 'cube(end,1,:)' are at the top-right
-%         - values 'cube(1,end,:)' are at the bottom-left
-%         - values 'cube(end,end,:)' are at the bottom-right
+%     index. Care must be taken regarding the orientation of the detector
+%     with respect to the indexing of 'cube'. The convention of this
+%     function is the standard xdscode convention where the x-axis is the
+%     incident x-ray direction, the z-axis points vertically up, and the
+%     y-axis completes the right-handed coordinate system. When the
+%     detector angles 'delta' and 'nu' are zero the incident x-rays point
+%     directly at the detector. If I am at the sample facing the detector
+%     in this configuration, the relationship between the detector
+%     orientation and the cube indices is given by the following:
+%         - values 'cube(1,1,:)' are at the top-left - values
+%         'cube(end,1,:)' are at the top-right - values 'cube(1,end,:)' are
+%         at the bottom-left - values 'cube(end,end,:)' are at the
+%         bottom-right
 %     That is, in this configuration increasing the horizontal index takes
 %     you along -y, and increasing the vertical index takes you along -z.
 % 
@@ -40,23 +38,22 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
 %     scan about the given value of the scan angle in the geometry
 %     structure.
 % 
-%     threshs: 2-element array with low (first index) and high (second index)
-%     intensity thresholding values. Pixels with intensity values outside
-%     this range are skipped in generating 'hkl_scatter'.
+%     threshs: 2-element array with low (first index) and high (second
+%     index) intensity thresholding values. Pixels with intensity values
+%     outside this range are skipped in generating 'hkl_scatter'.
 % 
 %     geometry: standard xdscode geometry structure.
 % 
 %     The detector angles nu and delta are right-handed and left-handed
-%     respectively. The handedness of the sample angles can vary depending on
-%     'geometry.rot_matrix', but this function assumes the general form of
-%     'huber_sixcircle_matrix'. This function is not compatible with
-%     non-orthogonal crystal systems.
+%     respectively. The handedness of the sample angles can vary depending
+%     on 'geometry.rot_matrix', but this function assumes the general form
+%     of 'huber_sixcircle_matrix' or 'huber_fourcircle_matrix'.
 % 
-%     OUTPUT:
-%     hkl_scatter: scattered data corresponding to each pixel in scan mapped
-%     to a position in reciprocal space (in r.l.u.). Each row is a given
-%     pixel in a given orientation. Columns 1, 2, and 3 are h-, k-, and
-%     l-values respectively, and column 4 is pixel intensity. The intensities
+%     OUTPUT: hkl_scatter: scattered data corresponding to each pixel in
+%     scan mapped to a position in reciprocal space (in r.l.u.). Each row
+%     is a given pixel in a given orientation. Columns 1, 2, and 3 are h-,
+%     k-, and l-values respectively, column 4 is pixel intensity, and
+%     column 5 is the corresponding value of `scan_var`. The intensities
 %     are scaled by 1/cos(gamma), where gamma is the angle of the scattered
 %     x-ray wavevector relative to the detector surface normal, to yield
 %     values proportional to the x-ray fluence incident on the pixel.
