@@ -1,6 +1,9 @@
 function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
     scan_range, threshs, geometry)
 
+% function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
+%     scan_range, threshs, geometry)
+%
 %     This function takes a (huber) angle scan cube and returns an
 %     hkl-mapping for each pixel
 % 
@@ -79,7 +82,16 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
     Rot_S = geometry.rot_matrix;
     Rot_D = @(d,n) rotationmat3D(n,zunit)*rotationmat3D(d,-yunit);
     SamRot = geometry.SamRot;
-    
+
+    if nargin(geometry.rot_matrix) == 4
+        fprintf('Assuming sixcircle matrix...\n')
+        mattype = 1;
+    elseif nargin(geometry.rot_matrix) == 3
+        fprintf('Assuming fourcircle matrix...\n')
+        mattype = 2;
+    else
+        error('Invalid `geometry.rot_matrix`: this function only works with sixcircle (4 args) or fourcircle (3 args) matrices.')
+    end
     nu = geometry.nu;
     delta = geometry.delta;
     
@@ -87,33 +99,37 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
     hkl_scatter_0 = zeros(num_calc,5);
     p = 1;
     
-    a = geometry.realvecs(1,1);
-    b = geometry.realvecs(2,2);
-    c = geometry.realvecs(3,3);
-    
     for ii = 1:length(cube(1,1,:))
         if strcmp(scan_angle, 'theta')
             theta = geometry.theta + scan_range(ii);
             phi = geometry.phi;
             chi = geometry.chi;
-            mu = geometry.mu;        
+            if mattype == 1
+                mu = geometry.mu;
+            end
         elseif strcmp(scan_angle, 'phi')
             theta = geometry.theta;
             phi = geometry.phi + scan_range(ii);
             chi = geometry.chi;
-            mu = geometry.mu;
+            if mattype == 1
+                mu = geometry.mu;
+            end
         elseif strcmp(scan_angle, 'chi')
             theta = geometry.theta;
             phi = geometry.phi;
             chi = geometry.chi + scan_range(ii);
-            mu = geometry.mu;
+            if mattype == 1
+                mu = geometry.mu;
+            end
         elseif strcmp(scan_angle, 'mu')
+            if mattype == 2
+                error('No `mu` angle for sixcircle diffractometers.')
+            end
             theta = geometry.theta;
             phi = geometry.phi;
             chi = geometry.chi;
             mu = geometry.mu + scan_range(ii);
         end
-        % disp([num2str(100*ii/length(cube(1,1,:))) '%'])
         
         HV = zeros(2, ROI_size);
         intens = zeros(ROI_size, 1);
@@ -152,7 +168,11 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
         
         s_out = pagemtimes(Rs, repmat((Rot_D(delta,nu))*s_in, [1,1,npx]));
         s_diff = s_out - s_in;
-        s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi,mu)*SamRot, [1,1,npx]), s_diff);
+        if mattype == 1
+            s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi,mu)*SamRot, [1,1,npx]), s_diff);
+        else
+            s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi)*SamRot, [1,1,npx]), s_diff);
+        end
         hkl = squeeze(permute(pagemtimes(geometry.realvecs, s_diff_crystal), [3 1 2]));
         
         hkl_scatter_0(p:p+npx-1,1:3) = hkl;
