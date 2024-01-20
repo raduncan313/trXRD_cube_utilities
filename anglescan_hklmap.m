@@ -114,34 +114,54 @@ function hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle,...
             mu = geometry.mu + scan_range(ii);
         end
         disp([num2str(100*ii/length(cube(1,1,:))) '%'])
+        
+        HV = zeros(ROI_size, 2);        
+        kk = 1;
         for hh = ROI_lim_h(1):ROI_lim_h(2)
             for vv = ROI_lim_v(1):ROI_lim_v(2)
-                if cube(hh,vv,ii) < threshs(1) || cube(hh,vv,ii) > threshs(2)
-                    continue
-                elseif hh == h_ind_c && vv == v_ind_c
-                    s_out = Rot_D(delta,nu)*s_in;
-                    gamma = 0;
-                else
-                    R_det = L_det*Rot_D(delta,nu)*xunit;
-                    L_pix = sqrt(((hh - h_ind_c)*l_pix_h)^2 + ((vv - v_ind_c)*l_pix_v)^2);
-                    R_pix = Rot_D(delta,nu)*(L_det*xunit +...
-                        (hh - h_ind_c)*l_pix_h*(-yunit) + (vv - v_ind_c)*l_pix_v*(-zunit));
-                    gamma = atand(L_pix/L_det);
-                    ax = cross(R_det, R_pix) / norm(cross(R_det, R_pix));
-                    s_out = rotationmat3D(gamma,ax)*Rot_D(delta,nu)*s_in;
+                if (cube(hh,vv,ii) > threshs(1) && cube(hh,vv,ii) < threshs(2))
+                    HV(kk, :) = [hh vv];
+                    kk = kk + 1;  
                 end
-
-                s_diff = s_out - s_in;
-                s_diff_crystal = (Rot_S(phi,theta,chi,mu)*SamRot)\s_diff;
-                hkl = geometry.realvecs*s_diff_crystal;
-                hkl_scatter_0(p,1) = hkl(1);
-                hkl_scatter_0(p,2) = hkl(2);
-                hkl_scatter_0(p,3) = hkl(3);
-                hkl_scatter_0(p,4) = cube(hh,vv,ii) / cosd(gamma);
-                hkl_scatter_0(p,5) = scan_range(ii);
-                p = p + 1;
             end
         end
+        HV = HV(1:kk-1,:);
+        hvc = [h_ind_c, v_ind_c];
+        l_pix = [l_pix_h, l_pix_v];
+        R_det = L_det*Rot_D(delta, nu)*xunit;
+        L_pix = vecnorm((HV - hvc).*l_pix, 2, 2);
+        R_pix = Rot_D(delta, nu)*(L_det*xunit' + ((HV - hvc).*l_pix)*[-yunit, -zunit]')
+%         L_pix = vecnorm(R_pix - R_det, 2, 2);
+        gamma = atand(L_pix./L_det);
+        ax = cross(R_det, R_pix, 2);
+        ax = ax/norm(ax);
+        
+        
+%         for hh = ROI_lim_h(1):ROI_lim_h(2)
+%             for vv = ROI_lim_v(1):ROI_lim_v(2)
+%                 if (cube(hh,vv,ii) < threshs(1) || cube(hh,vv,ii) > threshs(2))
+%                     continue
+%                 else
+%                     R_det = L_det*Rot_D(delta,nu)*xunit;
+%                     L_pix = sqrt(((hh - h_ind_c)*l_pix_h)^2 + ((vv - v_ind_c)*l_pix_v)^2);
+%                     R_pix = Rot_D(delta,nu)*(L_det*xunit +...
+%                         (hh - h_ind_c)*l_pix_h*(-yunit) + (vv - v_ind_c)*l_pix_v*(-zunit));
+%                     gamma = atand(L_pix/L_det);
+%                     ax = cross(R_det, R_pix) / norm(cross(R_det, R_pix));
+%                     s_out = rotationmat3D(gamma,ax)*Rot_D(delta,nu)*s_in;
+%                 end
+% 
+%                 s_diff = s_out - s_in;
+%                 s_diff_crystal = (Rot_S(phi,theta,chi,mu)*SamRot)\s_diff;
+%                 hkl = geometry.realvecs*s_diff_crystal;
+%                 hkl_scatter_0(p,1) = hkl(1);
+%                 hkl_scatter_0(p,2) = hkl(2);
+%                 hkl_scatter_0(p,3) = hkl(3);
+%                 hkl_scatter_0(p,4) = cube(hh,vv,ii) / cosd(gamma);
+%                 hkl_scatter_0(p,5) = scan_range(ii);
+%                 p = p + 1;
+%             end
+%         end
     end
     hkl_scatter = hkl_scatter_0(1:p-1,:);
     toc
