@@ -3,15 +3,15 @@ function [f, d] = plot_rois(d, n)
     d = clear_masks(d);
     for ii = 1:n
         if ii == 1
-            [d, f] = roi_mask(d);
+            [d, f1] = roi_mask(d);
         else
-            [d, f] = roi_mask(d, f);
+            [d, f1] = roi_mask(d, f1);
         end
 
         plot(d.on.scan_var, d.masks{ii}.sig, 'linewidth', 1.5);
     end
     
-    close(f)
+    close(f1)
     f = figure;
     subplot(1,2,1);
     imsum = sum(d.off.imgs, 3);

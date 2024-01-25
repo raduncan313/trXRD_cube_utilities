@@ -35,11 +35,11 @@ function d = load_and_preprocess(cubedir, runs, th, t0, info, col_ind)
 %     d = rebin_cube(d, 1);
     d = norm_i0(d);
     d = orient_SACLA(d);
-    d = thresh_mask(d, th);
+    % d = thresh_mask(d, th);
     d.on.scan_var = d.on.scan_var - t0;
     d.off.scan_var = d.off.scan_var - t0;
     d.info = info;
-    d.col_ind = col_ind;
+    % d.col_ind = col_ind;
 end
 
 function d = orient_SACLA(d)
