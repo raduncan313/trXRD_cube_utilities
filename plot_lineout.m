@@ -12,7 +12,7 @@ function [f, d, inds] = plot_lineout(d)
     close(f1)
 
     sz = size(d.on.imgs);
-    inds = sub2ind(size(d.on.imgs(:,:,1)), y, x);
+    inds = sub2ind([sz(1), sz(2)], y, x)
     
     imgs_on_2D = reshape(d.on.imgs, [sz(1)*sz(2), sz(3)]);
     imgs_off_2D = reshape(d.off.imgs, [sz(1)*sz(2), sz(3)]);
