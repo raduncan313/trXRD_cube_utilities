@@ -19,14 +19,23 @@ d7s_01m9 = load_and_preprocess(cubedir, r7s_01m9, th, t0 + 0.05, '01m9 7 mJpcm2 
 d10s_01m9 = load_and_preprocess(cubedir, r10s_01m9, th, t0, '01m9 10 mJpcm2 short', 5);
 d13s_01m9 = load_and_preprocess(cubedir, r13s_01m9, th, t0 + 0.05, '01m9 13 mJpcm2 short', 4);
 
+r1l_4m31 = {1292991};
+r7l_4m31 = {1293092};
+r13l_4m31 = {1293090};
+
+d1l_4m31 = load_and_preprocess(cubedir, r1l_4m31, th, t0 - 0.3, '4m31 1 mJpcm2 long', 1);
+d7l_4m31 = load_and_preprocess(cubedir, r7l_4m31, th, t0 - 0.3, '4m31 7 mJpcm2 long', 2);
+d13l_4m31 = load_and_preprocess(cubedir, r13l_4m31, th, t0 - 0.3, '4m31 13 mJpcm2 long', 3);
+
 % ds = {d1s_01m9, d3s_01m9, d7s_01m9, d10s_01m9, d13s_01m9};
 
 %%
-d = d1s_01m9;
+% d = d1s_01m9;
+d = d1l_4m31;
 
-% [f, d1] = plot_rois(d, 3)
+% [f, d1] = plot_rois(d, 2)
 % [f, d1] = thresh_and_plot(d, 0.05)
-[f, d] = plot_lineout(d);
+[f, d, inds] = plot_lineout(d);
 
 %% Functions
 
