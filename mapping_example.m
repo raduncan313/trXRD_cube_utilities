@@ -2,8 +2,8 @@ clear all
 close all
 
 % This is an example script for how to use the `anglescan_hklmap.m`
-% function in this repository. Ask me (Ryan) for the r129.mat file needed
-% to run this.
+% function in this repository. Ask me (Ryan) for the .mat and .vasp files
+% needed to run this.
 
 addpath(genpath('xdscode'))
 load r129.mat
