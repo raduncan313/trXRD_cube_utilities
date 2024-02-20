@@ -1,4 +1,4 @@
-function [f, d, inds] = plot_lineout(d)
+function [f, d] = plot_lineout(d)
     imsum = sum(d.off.imgs, 3);
     f1 = figure;
     imagesc(imsum);
@@ -27,7 +27,7 @@ function [f, d, inds] = plot_lineout(d)
 
     ax = subplot(1,3,2);
     imagesc([d.on.scan_var(1), d.on.scan_var(end)], [], sig);
-    xlabel('scan_var')
+    xlabel('scan\_var')
     
     dt = d.on.scan_var(2) - d.on.scan_var(1);
     freq = linspace(0, 1/dt, length(d.on.scan_var(d.on.scan_var > 0)));
@@ -39,5 +39,6 @@ function [f, d, inds] = plot_lineout(d)
     lineout.sig = sig;
     lineout.pixels = [y, x];
     lineout.fft = sig_fft;
+    lineout.inds = inds
     d.lineout = lineout;
 end

@@ -31,7 +31,7 @@ function [f, d] = plot_rois(d, n)
         plot(d.on.scan_var, d.masks{ii}.sig, 'linewidth', 1.5);
     end
     
-    xlabel('Time (ps)')
+    xlabel('scan\_var')
     ylabel('Intensity (norm.)')
 end
 

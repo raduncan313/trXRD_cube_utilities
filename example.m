@@ -34,8 +34,10 @@ d13l_4m31 = load_and_preprocess(cubedir, r13l_4m31, th, t0 - 0.3, '4m31 13 mJpcm
 d = d1l_4m31;
 
 % [f, d1] = plot_rois(d, 2)
-% [f, d1] = thresh_and_plot(d, 0.05)
-[f, d, inds] = plot_lineout(d);
+[f, d1] = thresh_and_plot(d, 0.05)
+% [f, d] = plot_lineout(d);
+write_sigs_to_csv(d1, './sigs')
+
 
 %% Functions
 
