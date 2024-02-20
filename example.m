@@ -5,7 +5,6 @@ close all
 % repository. Ask me (Ryan) for the data needed to run this.
 
 cubedir = 'C:/Users/radun/OneDrive - Stanford/Desktop/TSI_SACLA_June2023/cubes_post/';
-csvdir = 'sigs/';
 t0 = 4; % Nominal time-zero for this dataset.
 
 r1l_4m31 = {1292991};
