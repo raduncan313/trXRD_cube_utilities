@@ -3,3 +3,4 @@ xdscode/
 *.asv
 r129.mat
 *.vasp
+example_scratch.m

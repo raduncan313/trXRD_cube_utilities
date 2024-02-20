@@ -1,45 +1,31 @@
 clear all
 close all
 
+% This is an example script for how to use the various functions in this
+% repository. Ask me (Ryan) for the data needed to run this.
+
 cubedir = 'C:/Users/radun/OneDrive - Stanford/Desktop/TSI_SACLA_June2023/cubes_post/';
 csvdir = 'sigs/';
 th = 0.05; % Pixel intensity treshold (relative to max pixel intensity) for defining the ROI
 t0 = 4.3; % Nominal time-zero (needs a bit of tweaking on a run-by-run basis)
 cmap = lines; % colormap used later for plotting
 
-r1s_01m9 = {1293041, 1293043, 1293044};
-r3s_01m9 = {1293036, 1293039};
-r7s_01m9 = {1293034};
-r10s_01m9 = {1293052};
-r13s_01m9 = {1293046, 1293049};
-
-d1s_01m9 = load_and_preprocess(cubedir, r1s_01m9, th, t0 + 0.1, '01m9 1 mJpcm2 short', 1);
-d3s_01m9 = load_and_preprocess(cubedir, r3s_01m9, th, t0 + 0.1, '01m9 3 mJpcm2 short', 2);
-d7s_01m9 = load_and_preprocess(cubedir, r7s_01m9, th, t0 + 0.05, '01m9 7 mJpcm2 short', 3);
-d10s_01m9 = load_and_preprocess(cubedir, r10s_01m9, th, t0, '01m9 10 mJpcm2 short', 5);
-d13s_01m9 = load_and_preprocess(cubedir, r13s_01m9, th, t0 + 0.05, '01m9 13 mJpcm2 short', 4);
-
 r1l_4m31 = {1292991};
-r7l_4m31 = {1293092};
-r13l_4m31 = {1293090};
+d1 = load_and_preprocess(cubedir, r1l_4m31, th, t0 - 0.3, '4m31 1 mJpcm2 long ROIs', 1); % struct for saving ROIs
+d2 = load_and_preprocess(cubedir, r1l_4m31, th, t0 - 0.3, '4m31 1 mJpcm2 long threshs', 1); % struct for saving thresholded signal
 
-d1l_4m31 = load_and_preprocess(cubedir, r1l_4m31, th, t0 - 0.3, '4m31 1 mJpcm2 long', 1);
-d7l_4m31 = load_and_preprocess(cubedir, r7l_4m31, th, t0 - 0.3, '4m31 7 mJpcm2 long', 2);
-d13l_4m31 = load_and_preprocess(cubedir, r13l_4m31, th, t0 - 0.3, '4m31 13 mJpcm2 long', 3);
-
-% ds = {d1s_01m9, d3s_01m9, d7s_01m9, d10s_01m9, d13s_01m9};
-
-%%
-% d = d1s_01m9;
-d = d1l_4m31;
-
-% [f, d1] = plot_rois(d, 2)
-[f, d1] = thresh_and_plot(d, 0.05)
-% [f, d] = plot_lineout(d);
+%% Plot ROIs and save signals
+[f1, d1] = plot_rois(d1, 2)
 write_sigs_to_csv(d1, './sigs')
 
+%% Plot sum of pixels with total intensity over a given threshold (relative to the max pixel intensity) and save signals
+[f2, d2] = thresh_and_plot(d2, 0.05)
+write_sigs_to_csv(d2, './sigs')
 
-%% Functions
+%% Plot a lineout over the detector
+[f3, d1] = plot_lineout(d1);
+
+%% Helper functions for preprocessing
 
 function d = load_and_preprocess(cubedir, runs, th, t0, info, col_ind)
     d = read_cubes(cubedir, runs);
