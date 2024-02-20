@@ -6,13 +6,11 @@ close all
 
 cubedir = 'C:/Users/radun/OneDrive - Stanford/Desktop/TSI_SACLA_June2023/cubes_post/';
 csvdir = 'sigs/';
-th = 0.05; % Pixel intensity treshold (relative to max pixel intensity) for defining the ROI
-t0 = 4.3; % Nominal time-zero (needs a bit of tweaking on a run-by-run basis)
-cmap = lines; % colormap used later for plotting
+t0 = 4; % Nominal time-zero for this dataset
 
 r1l_4m31 = {1292991};
-d1 = load_and_preprocess(cubedir, r1l_4m31, th, t0 - 0.3, '4m31 1 mJpcm2 long ROIs', 1); % struct for saving ROIs
-d2 = load_and_preprocess(cubedir, r1l_4m31, th, t0 - 0.3, '4m31 1 mJpcm2 long threshs', 1); % struct for saving thresholded signal
+d1 = load_and_preprocess(cubedir, r1l_4m31, t0, '4m31 1 mJpcm2 long ROIs'); % struct for saving ROIs
+d2 = load_and_preprocess(cubedir, r1l_4m31, t0, '4m31 1 mJpcm2 long threshs'); % struct for saving thresholded signal
 
 %% Plot ROIs and save signals
 [f1, d1] = plot_rois(d1, 2)
@@ -27,16 +25,13 @@ write_sigs_to_csv(d2, './sigs')
 
 %% Helper functions for preprocessing
 
-function d = load_and_preprocess(cubedir, runs, th, t0, info, col_ind)
+function d = load_and_preprocess(cubedir, runs, t0, info)
     d = read_cubes(cubedir, runs);
-%     d = rebin_cube(d, 1);
     d = norm_i0(d);
     d = orient_SACLA(d);
-    % d = thresh_mask(d, th);
     d.on.scan_var = d.on.scan_var - t0;
     d.off.scan_var = d.off.scan_var - t0;
     d.info = info;
-    % d.col_ind = col_ind;
 end
 
 function d = orient_SACLA(d)
