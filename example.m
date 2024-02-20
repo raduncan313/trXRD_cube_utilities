@@ -6,7 +6,7 @@ close all
 
 cubedir = 'C:/Users/radun/OneDrive - Stanford/Desktop/TSI_SACLA_June2023/cubes_post/';
 csvdir = 'sigs/';
-t0 = 4; % Nominal time-zero for this dataset
+t0 = 4; % Nominal time-zero for this dataset.
 
 r1l_4m31 = {1292991};
 d1 = load_and_preprocess(cubedir, r1l_4m31, t0, '4m31 1 mJpcm2 long ROIs'); % struct for saving ROIs
