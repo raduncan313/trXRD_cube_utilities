@@ -1,4 +1,4 @@
-function d_sum = read_cubes(cubedir, runs)
+function d_sum = read_cubes(cubedir, runs, info)
     for ii = 1:length(runs)
         run = runs{ii};
         d = read_cube(cubedir, run);
@@ -15,6 +15,7 @@ function d_sum = read_cubes(cubedir, runs)
         end
     end
     d_sum.runs = runs;
+    d_sum.info = info;
 end
 
 function d = read_cube(cubedir, run)
