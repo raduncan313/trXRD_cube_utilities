@@ -19,13 +19,13 @@ end
 
 function d = read_cube(cubedir, run)
     d.runs = {run};
-    fname_on = sprintf('%1$srun%2$d_on.h5', cubedir, run);
+    fname_on = sprintf('%1$s/run%2$04d_on.h5', cubedir, run);
     d.on.scan_var = h5read(fname_on, '/scan_var');
     d.on.imgs = h5read(fname_on, '/imgs');
     d.on.i0 = h5read(fname_on, '/i0');
     d.on.bin_counts = h5read(fname_on, '/bin_counts');    
 
-    fname_off = sprintf('%1$srun%2$d_off.h5', cubedir, run);
+    fname_off = sprintf('%1$s/run%2$04d_off.h5', cubedir, run);
     d.off.scan_var = h5read(fname_off, '/scan_var');
     d.off.imgs = h5read(fname_off, '/imgs');
     d.off.i0 = h5read(fname_off, '/i0');
