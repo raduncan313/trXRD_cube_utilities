@@ -71,5 +71,10 @@ function sol = LPSVD(t, x, L, rat)
     sol.b = bs;
     sol.ph = phs;
     sol.amp = amps;
+    sol.t = t;
+    sol.x = x;
     sol.z = z;
+    sol.ssd = sum((x - z).^2);
+    sol.L = L;
+    sol.rat = rat;
 end
