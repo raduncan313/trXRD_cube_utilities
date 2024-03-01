@@ -1,4 +1,4 @@
-function sol = LPSVD(x, t, L, rat)
+function sol = LPSVD(t, x, L, rat)
     dt = t(2) - t(1);
     N = length(x);
     M = floor(rat*N);
