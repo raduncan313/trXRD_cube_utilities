@@ -36,7 +36,6 @@ function sol = LPSVD(x, t, L, rat)
     K = length(ws);
     Y = zeros(N, 2*K + 1);
     
-    n = [0:N-1]';
     for ii = 1:K
         b = bs(ii);
         w = ws(ii);
