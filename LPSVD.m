@@ -13,10 +13,10 @@ function sol = LPSVD(t, x, L, rat)
     Sinv(isinf(Sinv)) = 0;
     Sinv(isnan(Sinv)) = 0;
     
-    for ii = L+1:N-M
+    for ii = L+1:min(N-M, M)
         Sinv(ii,ii) = 0;
     end
-    
+
     a = [1; -V*Sinv*U'*x(1:N-M)];
     rts = roots(a);
     rts_srt = flip(sort(rts));
