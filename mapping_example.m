@@ -6,7 +6,7 @@ close all
 % needed to run this.
 
 addpath(genpath('xdscode'))
-load r129.mat
+% load r129.mat
 [P, tau_p, attypes_p, atnums_p] = readPOSCAR('TaSe42I_sm_isp_sd_1502042_springermaterials.vasp');
 
 tau_p = P*tau_p; % convert to cartesian
@@ -56,13 +56,17 @@ ROI_lim_h = [300 550];
 ROI_lim_v = [100 500];
 
 ROI_lims = {ROI_lim_h, ROI_lim_v};
-scan_range = linspace(-4, 4, length(cube(1,1,:)));
-scan_angle = 'phi';
+% scan_range = linspace(-4, 4, length(cube(1,1,:)));
+% scan_angle = 'phi';
 threshs = [40 1000];
 
-hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle, scan_range, threshs, geometry);
-scatter3(hkl_scatter(:,1),hkl_scatter(:,2),hkl_scatter(:,3),10*ones(length(hkl_scatter(:,1)),1),hkl_scatter(:,5),'filled')
-xlabel('h')
-ylabel('k')
-zlabel('l')
-axis vis3d
+d = Cube('./', {129}, 'phi', 'testing', geometry);
+d.norm_i0();
+f = d.hklmap(ROI_lims, threshs);
+% hkl_scatter = anglescan_hklmap(cube, ROI_lims, scan_angle, scan_range, threshs, geometry);
+
+% scatter3(hkl_scatter(:,1),hkl_scatter(:,2),hkl_scatter(:,3),10*ones(length(hkl_scatter(:,1)),1),hkl_scatter(:,5),'filled')
+% xlabel('h')
+% ylabel('k')
+% zlabel('l')
+% axis vis3d

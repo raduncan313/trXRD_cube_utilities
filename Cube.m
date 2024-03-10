@@ -7,10 +7,13 @@ classdef Cube < handle
         info = {};
         masks = {};
         normed_by_i0 = false;
+        geometry = [];
+        hkl_scatter = [];
+        scan_var_name = '';
     end
 
     methods
-        function obj = Cube(cubedir, runs, info)
+        function obj = Cube(cubedir, runs, scan_var_name, info, varargin)
             function d = read_cube(cubedir, run)
                 d.runs = {run};
                 fname_on = sprintf('%1$s/run%2$04d_on.h5', cubedir, run);
@@ -47,6 +50,27 @@ classdef Cube < handle
             obj.off = off;
             obj.runs = runs;
             obj.info = info;
+            obj.scan_var_name = scan_var_name;
+
+            if nargin == 5
+                obj.geometry = varargin{1};
+            end
+        end
+
+        function transpose(obj)
+            obj.clear_masks();
+            obj.clear_lineout();
+            obj.clear_geometry();
+            obj.on.imgs = permute(obj.on.imgs, [2,1,3]);
+            obj.off.imgs = permute(obj.off.imgs, [2,1,3]);
+        end
+
+        function flip(obj, dim)
+            obj.clear_masks();
+            obj.clear_lineout();
+            obj.clear_geometry();
+            obj.on.imgs = flip(obj.on.imgs, dim);
+            obj.off.imgs = flip(obj.off.imgs, dim);
         end
 
         function norm_i0(obj)
@@ -67,6 +91,14 @@ classdef Cube < handle
 
         function clear_masks(obj)
             obj.masks = {};
+        end
+
+        function clear_lineout(obj)
+            obj.lineout = struct();
+        end
+
+        function clear_geometry(obj)
+            obj.geometry = [];
         end
 
         function f = thresh_and_plot(obj, th)
@@ -256,6 +288,156 @@ classdef Cube < handle
             lineout.fft = sig_fft;
             lineout.inds = inds
             obj.lineout = lineout;
+        end
+
+        function f = plotdatacube(obj, type, caxis, box)
+            if strcmp(type, 'on')
+                data = obj.on.imgs;
+            elseif strcmp(type, 'off')
+                data = obj.off.imgs;
+            elseif strcmp(type, 'ratio')
+                data = obj.on.imgs./mean(obj.off.imgs, 3);
+            else
+                error('Invalid `type` parameter -- must be `on`, `off`, or `ratio`.')
+            end
+            plotdatacube(obj.on.scan_var, data, obj.geometry, caxis, box);
+            f = gcf;
+        end
+
+        function f = hklmap(obj, ROI_lims, threshs)
+            if isempty(obj.geometry)
+                error('Need a `geometry` struct for hkl mapping.')
+            end
+            
+            % Detector distance and pixel size
+            L_det = obj.geometry.detector.det_dist; % in millimeters
+            l_pix_h = obj.geometry.detector.det_size_horz / obj.geometry.detector.det_pixels_horz; % in millimeters
+            l_pix_v = obj.geometry.detector.det_size_vert / obj.geometry.detector.det_pixels_vert; % in millimeters
+            l_pix = [l_pix_h, l_pix_v]';
+        
+            ROI_lim_h = ROI_lims{1};
+            ROI_lim_v = ROI_lims{2};
+            ROI_size = (ROI_lim_h(2) - ROI_lim_h(1) + 1)*(ROI_lim_v(2) - ROI_lim_v(1) + 1);
+            
+            h_ind_c = obj.geometry.beam_center(1);
+            v_ind_c = obj.geometry.beam_center(2);
+            hvc = [h_ind_c, v_ind_c]';
+            
+            lambda = obj.geometry.lambda0;
+            xunit = [1 0 0]';
+            yunit = [0 1 0]';
+            zunit = [0 0 1]';
+            s_in = (1/lambda)*xunit;
+            Rot_S = obj.geometry.rot_matrix;
+            Rot_D = @(d,n) rotationmat3D(n,zunit)*rotationmat3D(d,-yunit);
+            SamRot = obj.geometry.SamRot;
+        
+            if nargin(obj.geometry.rot_matrix) == 4
+                fprintf('Assuming sixcircle matrix...\n')
+                mattype = 1;
+            elseif nargin(obj.geometry.rot_matrix) == 3
+                fprintf('Assuming fourcircle matrix...\n')
+                mattype = 2;
+            else
+                error('Invalid `geometry.rot_matrix`: this function only works with sixcircle (4 args) or fourcircle (3 args) matrices.')
+            end
+            nu = obj.geometry.nu;
+            delta = obj.geometry.delta;
+            
+            num_calc = ROI_size * length(obj.off.imgs(1,1,:));
+            hkl_scatter_0 = zeros(num_calc,5);
+            p = 1;
+            
+            for ii = 1:length(obj.off.imgs(1,1,:))
+                if strcmp(obj.scan_var_name, 'theta')
+                    theta = obj.off.scan_var(ii);
+                    phi = obj.geometry.phi;
+                    chi = obj.geometry.chi;
+                    if mattype == 1
+                        mu = obj.geometry.mu;
+                    end
+                elseif strcmp(obj.scan_var_name, 'phi')
+                    theta = obj.geometry.theta;
+                    phi = obj.off.scan_var(ii);
+                    chi = obj.geometry.chi;
+                    if mattype == 1
+                        mu = obj.geometry.mu;
+                    end
+                elseif strcmp(obj.scan_var_name, 'chi')
+                    theta = obj.geometry.theta;
+                    phi = obj.geometry.phi;
+                    chi = obj.off.scan_var(ii);
+                    if mattype == 1
+                        mu = obj.geometry.mu;
+                    end
+                elseif strcmp(obj.scan_var_name, 'mu')
+                    if mattype == 2
+                        error('No `mu` angle for fourcircle matrix.')
+                    end
+                    theta = obj.geometry.theta;
+                    phi = obj.geometry.phi;
+                    chi = obj.geometry.chi;
+                    mu = obj.off.scan_var(ii);
+                else
+                    error('Invalid `scan_var_name`.')
+                end
+                
+                HV = zeros(2, ROI_size);
+                intens = zeros(ROI_size, 1);
+                kk = 1;
+                for hh = ROI_lim_h(1):ROI_lim_h(2)
+                    for vv = ROI_lim_v(1):ROI_lim_v(2)
+                        if (obj.off.imgs(hh,vv,ii) > threshs(1) && obj.off.imgs(hh,vv,ii) < threshs(2))
+                            HV(:, kk) = [hh vv]';
+                            intens(kk) = obj.off.imgs(hh,vv,ii);
+                            kk = kk + 1;  
+                        end
+                    end
+                end
+                npx = kk - 1;
+                HV = HV(:,1:npx);
+                if isempty(HV)
+                    continue
+                end
+                intens = intens(1:npx);        
+                R_det = L_det*Rot_D(delta, nu)*xunit;
+                R_pix = Rot_D(delta, nu)*(L_det*xunit + [-yunit, -zunit]*((HV - hvc).*l_pix));
+                L_pix = vecnorm(R_pix - R_det, 2, 1)';
+                gamma = atand(L_pix./L_det);
+                ax = cross(repmat(R_det, [1,npx]), R_pix, 1);
+                ax = ax./vecnorm(ax, 2, 1);
+                
+                Rs = zeros(3,3,npx);
+                for jj = 1:npx
+                    gam = gamma(jj);
+                    axx = ax(:, jj);
+                    R = rotationmat3D(gam, axx);
+                    Rs(:,:,jj) = R;
+                end
+                
+                s_out = pagemtimes(Rs, repmat((Rot_D(delta,nu))*s_in, [1,1,npx]));
+                s_diff = s_out - s_in;
+                if mattype == 1
+                    s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi,mu)*SamRot, [1,1,npx]), s_diff);
+                else
+                    s_diff_crystal = pagemldivide(repmat(Rot_S(phi,theta,chi)*SamRot, [1,1,npx]), s_diff);
+                end
+                hkl = squeeze(permute(pagemtimes(obj.geometry.realvecs, s_diff_crystal), [3 1 2]));        
+                hkl_scatter_0(p:p+npx-1,1:3) = hkl;
+                hkl_scatter_0(p:p+npx-1,4) = intens./cosd(gamma);
+                hkl_scatter_0(p:p+npx-1,5) = obj.off.scan_var(ii);
+                p = p + npx;
+                
+            end
+            obj.hkl_scatter = hkl_scatter_0(1:p-1,:);
+            f = scatter3(obj.hkl_scatter(:,1),obj.hkl_scatter(:,2),...
+                obj.hkl_scatter(:,3),...
+                10*ones(length(obj.hkl_scatter(:,1)),1),...
+                obj.hkl_scatter(:,5),'filled')
+            xlabel('h')
+            ylabel('k')
+            zlabel('l')
+            axis vis3d
         end
     end
 
