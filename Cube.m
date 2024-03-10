@@ -309,10 +309,9 @@ classdef Cube < handle
                 error('Need a `geometry` struct for hkl mapping.')
             end
             
-            % Detector distance and pixel size
-            L_det = obj.geometry.detector.det_dist; % in millimeters
-            l_pix_h = obj.geometry.detector.det_size_horz / obj.geometry.detector.det_pixels_horz; % in millimeters
-            l_pix_v = obj.geometry.detector.det_size_vert / obj.geometry.detector.det_pixels_vert; % in millimeters
+            L_det = obj.geometry.detector.det_dist;
+            l_pix_h = obj.geometry.detector.det_size_horz / obj.geometry.detector.det_pixels_horz;
+            l_pix_v = obj.geometry.detector.det_size_vert / obj.geometry.detector.det_pixels_vert;
             l_pix = [l_pix_h, l_pix_v]';
         
             ROI_lim_h = ROI_lims{1};
