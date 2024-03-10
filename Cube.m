@@ -199,6 +199,74 @@ classdef Cube < handle
                 writematrix([obj.on.scan_var, obj.masks{ii}.sig], savedir);
             end
         end
+
+        function plot_sigs_to_axis(obj, ax, leg)        
+            axes(ax);
+            hold on
+            leg_str = leg.String;
+            
+            for ii = 1:length(obj.masks)
+                plot(obj.on.scan_var, obj.masks{ii}.sig, 'linewidth', 1.5)
+                leg_str{end+1} = sprintf('%1$s mask %2$d', obj.info, ii);
+            end
+            
+            set(leg, 'string', leg_str)
+        end
+
+        function f = plot_mask(obj, num)
+            f = figure
+            subplot(1,2,1)
+            imagesc(obj.masks{num}.mask)
+            title('Mask')
+            subplot(1,2,2)
+            imagesc(sum(obj.off.imgs, 3))
+            title(sprintf('Summed off-image: %1$s', obj.info))
+        end
+        
+        function f = plot_lineout(obj)
+            imsum = sum(obj.off.imgs, 3);
+            f1 = figure;
+            imagesc(imsum);
+            hold on
+            set(gca, 'colorscale', 'log');
+            title('Select lineout')
+            [x, y, ~] = improfile;
+            x = round(x);
+            y = round(y);
+            plot(x, y, 'Color', 'red', 'LineWidth', 2)
+            close(f1)
+        
+            sz = size(obj.on.imgs);
+            inds = sub2ind([sz(1), sz(2)], y, x)
+            
+            imgs_on_2D = reshape(obj.on.imgs, [sz(1)*sz(2), sz(3)]);
+            imgs_off_2D = reshape(obj.off.imgs, [sz(1)*sz(2), sz(3)]);
+            sig = imgs_on_2D(inds, :)./mean(imgs_off_2D(inds, :), 2);
+        
+            f = figure
+            ax = subplot(1,3,1);
+            imagesc(imsum);
+            hold on
+            set(gca, 'colorscale', 'log')
+            plot(x, y, 'Color', 'red', 'LineWidth', 2)
+        
+            ax = subplot(1,3,2);
+            imagesc([obj.on.scan_var(1), obj.on.scan_var(end)], [], sig);
+            xlabel('scan\_var')
+            
+            dt = obj.on.scan_var(2) - obj.on.scan_var(1);
+            freq = linspace(0, 1/dt, length(obj.on.scan_var(obj.on.scan_var > 0)));
+            sig_fft = abs(fft(sig(:,(obj.on.scan_var > 0)), [], 2))';
+            ax = subplot(1,3,3, 'ydir', 'normal');
+            imagesc([], [freq(1), freq(end)], sig_fft)
+            set(ax, 'ydir', 'normal');
+        
+            lineout.sig = sig;
+            lineout.pixels = [y, x];
+            lineout.fft = sig_fft;
+            lineout.inds = inds
+            obj.lineout = lineout;
+        end
     end
 
     methods (Access = private)

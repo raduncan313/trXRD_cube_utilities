@@ -7,8 +7,7 @@ runs = {1292991};
 info = 'testing';
 d1 = Cube(cubedir, runs, info);
 d1.norm_i0();
-d1.thresh_and_plot(0.05);
-d1.write_sigs_to_csv('sigs/')
+f = d1.plot_lineout()
 
 %% Helper functions for preprocessing
 
