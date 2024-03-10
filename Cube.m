@@ -151,39 +151,32 @@ classdef Cube < handle
             obj.off.bin_counts = bin_counts_off;
         end
 
-        function f = plot_rois(obj, n)
-        
+        function f = plot_rois(obj, n)        
             obj.clear_masks();
             for ii = 1:n
                 if ii == 1
                     f1 = obj.roi_mask();
                 else
                     f1 = obj.roi_mask(f1);
-                end
-        
+                end        
                 plot(obj.on.scan_var, obj.masks{ii}.sig, 'linewidth', 1.5);
-            end
-            
+            end            
             close(f1)
             f = figure;
             subplot(1,2,1);
             imsum = sum(obj.off.imgs, 3);
             imagesc(imsum);
             set(gca, 'colorscale', 'log');
-            hold on
-            
+            hold on            
             for ii = 1:n
                 m = obj.masks{ii};
                 plot(m.roi(:,1), m.roi(:,2), 'linewidth', 2);
-            end
-            
+            end            
             subplot(1,2,2);
-            hold on
-            
+            hold on            
             for ii = 1:n
                 plot(obj.on.scan_var, obj.masks{ii}.sig, 'linewidth', 1.5);
-            end
-            
+            end            
             xlabel('scan\_var')
             ylabel('Intensity (norm.)')
         end
@@ -191,8 +184,7 @@ classdef Cube < handle
         function write_sigs_to_csv(obj, folder)
             if ~exist(folder, 'dir')
                 mkdir(folder);
-            end
-            
+            end            
             for ii = 1:length(obj.masks)
                 savedir = sprintf('%1$s/%2$s_mask%3$d.csv', folder, obj.info, ii);
                 savedir = strrep(savedir, ' ', '_');
@@ -203,13 +195,11 @@ classdef Cube < handle
         function plot_sigs_to_axis(obj, ax, leg)        
             axes(ax);
             hold on
-            leg_str = leg.String;
-            
+            leg_str = leg.String;            
             for ii = 1:length(obj.masks)
                 plot(obj.on.scan_var, obj.masks{ii}.sig, 'linewidth', 1.5)
                 leg_str{end+1} = sprintf('%1$s mask %2$d', obj.info, ii);
-            end
-            
+            end            
             set(leg, 'string', leg_str)
         end
 
