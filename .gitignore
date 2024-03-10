@@ -1,6 +1,8 @@
 sigs/
 xdscode/
 *.asv
-r129.mat
+r129.*
 *.vasp
+*.h5
 example_scratch.m
+untitled*
