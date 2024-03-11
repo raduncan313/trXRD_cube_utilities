@@ -10,3 +10,7 @@ Below are some use cases of the Cube class:
 - Manual ROI-based processing and plotting:
 
 ![Alt text](images/rois.png)
+
+- Autoregressive modeling using the LPSVD method of Barkhuijsen *et al.*, *J. Magn. Reson* 61, 465 (1985):
+
+- ![Alt text](images/LPSVD.png)
