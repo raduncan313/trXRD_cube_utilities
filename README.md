@@ -13,4 +13,16 @@ Below are some use cases of the Cube class:
 
 - Autoregressive modeling using the LPSVD method of Barkhuijsen *et al.*, *J. Magn. Reson* 61, 465 (1985):
 
-- ![Alt text](images/LPSVD.png)
+![Alt text](images/LPSVD.png)
+
+- Plotting dispersion relations across line cuts on the detector image:
+
+![Alt text](images/lineout.png)
+
+- Automatically identify signal on the detector image and automatically group pixels into ROIs using a principal component analysis / DBSCAN clustering sequence:
+
+![Alt text](images/auto_signal.png)
+
+- Map an angle-scan measurement into reciprocal space:
+
+![Alt text](images/hkl_map.png)
