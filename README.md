@@ -1,6 +1,34 @@
 # trXRD_cube_utilities
 An object-oriented MATLAB coding framework to help with analysis of ultrafast x-ray diffraction experiments.
 
+## Examples
+
+See `examples.m` for demonstrations on how to use the `Cube` class for analysis. This script requires some data that I won't post to GitHub, so ask me for it if you would like to run it.
+
+Below are some use cases of the Cube class:
+
+- Manual ROI-based processing and plotting:
+
+![Alt text](images/rois.png)
+
+- Autoregressive modeling using the LPSVD decomposition procedure of Barkhuijsen *et al.*, *J. Magn. Reson.* 61, 465 (1985):
+
+![Alt text](images/LPSVD.png)
+
+- Plotting dispersion relations across line cuts on the detector image:
+
+![Alt text](images/lineout.png)
+
+- Automatically identify signal on the detector image and automatically group pixels into ROIs using a principal component analysis / DBSCAN clustering sequence:
+
+![Alt text](images/auto_signal.png)
+
+- Map an angle-scan measurement into reciprocal space:
+
+![Alt text](images/hkl_map.png)
+
+## Documentation
+
 The `Cube` class has the following properties:
 - `on` / `off`: structs containing the data for the pump-on and pump-off measurements for the run, which consist of the following fields:
   - `imgs`: the binned detector images in "cube" format, where the first two dimensions are the dimensions of the detector array and the third dimension is the scan variable binning axis.
@@ -36,27 +64,3 @@ The `Cube` class has the following properties:
   - `fft`: modulus of the Fourier transform of `sig` along the `scan_var` coordinate.
 - `normed_by_i0`: boolean representing whether the cube has used `norm_i0` to divide out systematic x-ray intensity fluctuations.
 - `hkl_scatter`: an $n \times 5$ array containing the hkl mapping output of `hklmap`. The first three columns are positions in reciprocal space ($h$, $k$, and $l$), the fourth column is the pixel intensity for a given `scan_var` value, and the fifth column is the value of `scan_var`.
-
-See `examples.m` for demonstrations on how to use the `Cube` class for analysis. This script requires some data that I won't post to GitHub, so ask me for it if you would like to run it.
-
-Below are some use cases of the Cube class:
-
-- Manual ROI-based processing and plotting:
-
-![Alt text](images/rois.png)
-
-- Autoregressive modeling using the LPSVD decomposition procedure of Barkhuijsen *et al.*, *J. Magn. Reson.* 61, 465 (1985):
-
-![Alt text](images/LPSVD.png)
-
-- Plotting dispersion relations across line cuts on the detector image:
-
-![Alt text](images/lineout.png)
-
-- Automatically identify signal on the detector image and automatically group pixels into ROIs using a principal component analysis / DBSCAN clustering sequence:
-
-![Alt text](images/auto_signal.png)
-
-- Map an angle-scan measurement into reciprocal space:
-
-![Alt text](images/hkl_map.png)
