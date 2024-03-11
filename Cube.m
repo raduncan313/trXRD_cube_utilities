@@ -293,7 +293,7 @@ classdef Cube < handle
             obj.lineout = lineout;
         end
 
-        function f = plotdatacube(obj, type, caxis, box, varargin)
+        function f = plotdatacube(obj, type, caxis, varargin)
             if strcmp(type, 'on')
                 data = obj.on.imgs;
             elseif strcmp(type, 'off')
@@ -304,12 +304,12 @@ classdef Cube < handle
                 error('Invalid `type` parameter -- must be `on`, `off`, or `ratio`.')
             end
 
-            if nargin == 5
+            if nargin == 4
                 if strcmp(varargin{1}, 'log')
                     data = log10(data);
                 end
             end
-            plotdatacube(obj.on.scan_var, data, obj.geometry, caxis, box);
+            plotdatacube(obj.on.scan_var, data, obj.geometry, caxis, []);
             f = gcf;
         end
 
