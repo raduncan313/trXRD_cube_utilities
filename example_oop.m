@@ -6,10 +6,15 @@ cubedir = 'C:/Users/radun/OneDrive - Stanford/Desktop/TSI_SACLA_June2023/cubes_p
 t0 = 4; % Nominal time-zero for this dataset.
 runs = {1292991};
 info = 'testing';
-% d = Cube(cubedir, runs, info);
-d = Cube('./', {129}, 'testing');
+d = Cube(cubedir, runs, 'delay', info);
+% d = Cube('./', {129}, 'testing');
 d.norm_i0();
-f = d.plotdatacube('on', [0 100], []);
+d.subtract_t0(t0);
+f = d.thresh_and_plot(0.05);
+close(f);
+f = d.LPSVD_sig(1, 4, 0.75, 0)
+
+% f = d.plotdatacube('on', [0 100], []);
 % f = d.plot_lineout();
 
 %% Helper functions for preprocessing
