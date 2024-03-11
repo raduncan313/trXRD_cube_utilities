@@ -13,7 +13,7 @@ classdef Cube < handle
     end
 
     methods
-        function obj = Cube(cubedir, runs, scan_var_name, info, varargin)
+        function obj = Cube(cubedir, runs, scan_var_name, info)
             function d = read_cube(cubedir, run)
                 d.runs = {run};
                 fname_on = sprintf('%1$s/run%2$04d_on.h5', cubedir, run);
@@ -51,10 +51,10 @@ classdef Cube < handle
             obj.runs = runs;
             obj.info = info;
             obj.scan_var_name = scan_var_name;
+        end
 
-            if nargin == 5
-                obj.geometry = varargin{1};
-            end
+        function add_geometry(obj, geometry)
+            obj.geometry = geometry;
         end
 
         function transpose(obj)
@@ -240,11 +240,12 @@ classdef Cube < handle
 
         function f = plot_mask(obj, num)
             f = figure
-            subplot(1,2,1)
-            imagesc(obj.masks{num}.mask)
+            ax = subplot(1,2,1)
+            imagesc(obj.masks{num}.mask);
             title('Mask')
-            subplot(1,2,2)
-            imagesc(sum(obj.off.imgs, 3))
+            ax = subplot(1,2,2);
+            imagesc(sum(obj.off.imgs, 3));
+            set(ax, 'colorscale', 'log');
             title(sprintf('Summed off-image: %1$s', obj.info))
         end
         
@@ -441,7 +442,7 @@ classdef Cube < handle
             f = scatter3(obj.hkl_scatter(:,1),obj.hkl_scatter(:,2),...
                 obj.hkl_scatter(:,3),...
                 10*ones(length(obj.hkl_scatter(:,1)),1),...
-                obj.hkl_scatter(:,5),'filled')
+                obj.hkl_scatter(:,5),'filled');
             xlabel('h')
             ylabel('k')
             zlabel('l')
@@ -514,13 +515,17 @@ classdef Cube < handle
             end
             
             z = zeros(N,1);
+            y = zeros(N, K+1);
             for ii = 1:K
                 b = bs(ii);
                 ph = phs(ii);
                 amp = amps(ii);
                 w = ws(ii);
-                z = z + amp*exp(-b*t).*cos(w*t - ph);
+                yy = amp*exp(-b*t).*cos(w*t - ph);
+                z = z + yy;
+                y(:,ii) = yy;
             end
+            y(:,end) = coefs(end);
             z = z + coefs(end);
             
             sol.w = ws;
@@ -529,6 +534,7 @@ classdef Cube < handle
             sol.amp = amps;
             sol.t = t;
             sol.x = x;
+            sol.y = y;
             sol.z = z;
             sol.ssd = sum((x - z).^2);
             sol.L = L;
@@ -536,12 +542,19 @@ classdef Cube < handle
             obj.masks{num}.LPSVD = sol;
 
             f = figure;
+            ax = subplot(1,2,1);
             hold on
             plot(obj.on.scan_var, obj.masks{num}.sig, 'linewidth', 2);
             plot(sol.t, sol.z, 'linewidth', 2);
+
+            ax = subplot(1,2,2);
+            hold on
+            for ii = 1:K+1
+                plot(sol.t, sol.y(:,ii), 'LineWidth', 2);
+            end
         end
 
-        function auto_signal(obj, numcomponents, epsilon, minpts, scale)
+        function f = auto_signal(obj, numcomponents, epsilon, minpts, scale)
             sz = size(obj.on.imgs);
             on_flat = reshape(obj.on.imgs, [], sz(3));
             on_flat_sc = reshape(obj.on.imgs, [], sz(3));
@@ -580,7 +593,6 @@ classdef Cube < handle
                 jj1D = sub2ind([sz(1), sz(2)], inds_clst(:,1), inds_clst(:,2));
                 sig_clst = mean(on_flat(jj1D,:), 1)./mean(off_flat(jj1D,:), 'all');
                 sigs_clsts{ii} = sig_clst;
-                disp(size(sig_clst))
                 inds_clsts{ii} = inds_clst;
             end
             f = figure;
@@ -589,13 +601,13 @@ classdef Cube < handle
             hold on
             set(ax, 'colorscale', 'log')
             for ii = 1:length(inds_clsts)
-                scatter(inds_clsts{ii}(:,2), inds_clsts{ii}(:,1), '.')
+                plot(inds_clsts{ii}(:,2), inds_clsts{ii}(:,1), '.', 'MarkerSize', 10);
             end
 
             ax = subplot(1,2,2);
             hold on
             for ii = 1:length(sigs_clsts)
-                plot(obj.on.scan_var, sigs_clsts{ii}, 'linewidth', 1.5)
+                plot(obj.on.scan_var, sigs_clsts{ii} + ii, 'linewidth', 1.5);
             end
         end
     end
