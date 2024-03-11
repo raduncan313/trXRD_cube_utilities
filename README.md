@@ -29,6 +29,8 @@ Below are some use cases of the `Cube` class:
 
 ## Documentation
 
+This code interacts with the `xdscode` library used by the Reis/Trigo group at SLAC, so you'll need that in order to run some of the methods in the `Cube` class.
+
 The `Cube` class has the following properties:
 - `on` / `off`: structs containing the data for the pump-on and pump-off measurements for the run, which consist of the following fields:
     - `imgs`: the binned detector images in "cube" format, where the first two dimensions are the dimensions of the detector array and the third dimension is the scan variable binning axis.
