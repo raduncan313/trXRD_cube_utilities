@@ -293,7 +293,7 @@ classdef Cube < handle
             obj.lineout = lineout;
         end
 
-        function f = plotdatacube(obj, type, caxis, box)
+        function f = plotdatacube(obj, type, caxis, box, varargin)
             if strcmp(type, 'on')
                 data = obj.on.imgs;
             elseif strcmp(type, 'off')
@@ -302,6 +302,12 @@ classdef Cube < handle
                 data = obj.on.imgs./mean(obj.off.imgs, 3);
             else
                 error('Invalid `type` parameter -- must be `on`, `off`, or `ratio`.')
+            end
+
+            if nargin == 5
+                if strcmp(varargin{1}, 'log')
+                    data = log10(data);
+                end
             end
             plotdatacube(obj.on.scan_var, data, obj.geometry, caxis, box);
             f = gcf;
@@ -533,6 +539,64 @@ classdef Cube < handle
             hold on
             plot(obj.on.scan_var, obj.masks{num}.sig, 'linewidth', 2);
             plot(sol.t, sol.z, 'linewidth', 2);
+        end
+
+        function auto_signal(obj, numcomponents, epsilon, minpts, scale)
+            sz = size(obj.on.imgs);
+            on_flat = reshape(obj.on.imgs, [], sz(3));
+            on_flat_sc = reshape(obj.on.imgs, [], sz(3));
+            mean_on = mean(on_flat_sc, 2);
+            std_on = std(on_flat_sc, 0, 2);
+            on_flat_sc = (on_flat_sc - mean_on)./std_on;
+            on_flat_sc(isnan(on_flat_sc)) = 0;
+            on_flat_sc(isinf(on_flat_sc)) = 0;
+
+            off_flat = reshape(obj.off.imgs, [], sz(3));
+            off_flat_sc = reshape(obj.off.imgs, [], sz(3));
+            mean_off = mean(off_flat_sc, 2);
+            std_off = std(off_flat_sc, 0, 2);
+            off_flat_sc = (off_flat_sc - mean_off)./std_off;
+            off_flat_sc(isnan(off_flat_sc)) = 0;
+            off_flat_sc(isinf(off_flat_sc)) = 0;
+
+            [~, X_on, ~] = pca(on_flat_sc, 'NumComponents', numcomponents);
+            [~, X_off, ~] = pca(off_flat_sc, 'NumComponents', numcomponents);
+
+            norms_on = vecnorm(X_on, 2, 2);
+            norms_off = vecnorm(X_off, 2, 2);
+            thresh = max(norms_off)*scale;
+            has_signal = (norms_on > thresh);
+            inds_1D = find(has_signal == true);
+            [x, y] = ind2sub([sz(1), sz(2)], inds_1D);
+            X_db = [x y];
+            idx = dbscan(X_db, epsilon, minpts);
+            idx_unq = unique(idx);
+            idx_unq = idx_unq(idx_unq ~= -1);
+            sigs_clsts = cell(1,length(idx_unq));
+            inds_clsts = cell(1,length(idx_unq));
+
+            for ii = 1:length(idx_unq)
+                inds_clst = X_db(idx == idx_unq(ii), :);
+                jj1D = sub2ind([sz(1), sz(2)], inds_clst(:,1), inds_clst(:,2));
+                sig_clst = mean(on_flat(jj1D,:), 1)./mean(off_flat(jj1D,:), 'all');
+                sigs_clsts{ii} = sig_clst;
+                disp(size(sig_clst))
+                inds_clsts{ii} = inds_clst;
+            end
+            f = figure;
+            ax = subplot(1,2,1);
+            imagesc(sum(obj.on.imgs, 3))
+            hold on
+            set(ax, 'colorscale', 'log')
+            for ii = 1:length(inds_clsts)
+                scatter(inds_clsts{ii}(:,2), inds_clsts{ii}(:,1), '.')
+            end
+
+            ax = subplot(1,2,2);
+            hold on
+            for ii = 1:length(sigs_clsts)
+                plot(obj.on.scan_var, sigs_clsts{ii}, 'linewidth', 1.5)
+            end
         end
     end
 
