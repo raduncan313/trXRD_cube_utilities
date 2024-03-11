@@ -9,4 +9,4 @@ Below are some use cases of the Cube class:
 
 - Manual ROI-based processing and plotting:
 
-![Alt text](relative%20images/rois.png)
+![Alt text](images/rois.png)
