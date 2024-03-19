@@ -25,7 +25,7 @@ folder = 'sigs/';
 d.write_sigs_to_csv(folder); % Saves the signals from the mask as .csv files in `folder`.
 
 %% Draw ROIs and plot the integrated signals
-n = 3;
+n = 1;
 f3 = d.plot_rois(n) % draw n ROIs and plot the integrated signals
 
 %% Apply LPSVD autoregressive modeling to the signal generated in the previous section
@@ -37,12 +37,12 @@ f4 = d.LPSVD_sig(1, L, rat, t_start)
 %% Plot a dispersion relation by drawing a lineout on the detector image
 f5 = d.plot_lineout();
 
-%% Auto-detect ROIs using PCA-DBSCAN
-numcomponents = 2;
+%% Auto-detect ROIs using PCA-OCSVM-DBSCAN sequence
+numcomponents = 10;
 epsilon = 8;
-minpts = 5;
-scale = 0.7;
-f6 = d.auto_signal(numcomponents, epsilon, minpts, scale)
+minpts = 10;
+frac = 0.03;
+f6 = d.auto_signal(numcomponents, epsilon, minpts, frac)
 
 %% Construct an xdscode `geometry` struct, load an angle scan, and map it into reciprocal space
 

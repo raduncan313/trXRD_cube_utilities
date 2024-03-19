@@ -19,7 +19,7 @@ Below are some use cases of the `Cube` class:
 
 ![Alt text](images/lineout.png)
 
-- Automatically identify signal on the detector image and automatically group pixels into ROIs using a principal component analysis / DBSCAN clustering sequence:
+- Automatically identify signal on the detector image and automatically group pixels into ROIs using a PCA-OCSVM-DBSCAN sequence:
 
 ![Alt text](images/auto_signal.png)
 
