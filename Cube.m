@@ -554,7 +554,7 @@ classdef Cube < handle
             end
         end
 
-        function f = auto_signal(obj, numcomponents, epsilon, minpts, scale)
+        function f = auto_signal(obj, numcomponents, epsilon, minpts, frac)
             sz = size(obj.on.imgs);
             on_flat = reshape(obj.on.imgs, [], sz(3));
             on_flat_sc = reshape(obj.on.imgs, [], sz(3));
@@ -565,20 +565,13 @@ classdef Cube < handle
             on_flat_sc(isinf(on_flat_sc)) = 0;
 
             off_flat = reshape(obj.off.imgs, [], sz(3));
-            off_flat_sc = reshape(obj.off.imgs, [], sz(3));
-            mean_off = mean(off_flat_sc, 2);
-            std_off = std(off_flat_sc, 0, 2);
-            off_flat_sc = (off_flat_sc - mean_off)./std_off;
-            off_flat_sc(isnan(off_flat_sc)) = 0;
-            off_flat_sc(isinf(off_flat_sc)) = 0;
 
             [~, X_on, ~] = pca(on_flat_sc, 'NumComponents', numcomponents);
-            [~, X_off, ~] = pca(off_flat_sc, 'NumComponents', numcomponents);
 
-            norms_on = vecnorm(X_on, 2, 2);
-            norms_off = vecnorm(X_off, 2, 2);
-            thresh = max(norms_off)*scale;
-            has_signal = (norms_on > thresh);
+            rng(42);
+            [Mdl, has_signal] = ocsvm(X_on, 'contaminationfraction', frac,...
+                'kernelscale', 'auto');
+
             inds_1D = find(has_signal == true);
             [x, y] = ind2sub([sz(1), sz(2)], inds_1D);
             X_db = [x y];
