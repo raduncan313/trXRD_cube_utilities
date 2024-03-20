@@ -588,6 +588,7 @@ classdef Cube < handle
                 sigs_clsts{ii} = sig_clst;
                 inds_clsts{ii} = inds_clst;
             end
+            
             f = figure;
             ax = subplot(1,2,1);
             imagesc(sum(obj.on.imgs, 3))
