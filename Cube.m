@@ -604,6 +604,22 @@ classdef Cube < handle
                 plot(obj.on.scan_var, sigs_clsts{ii} + ii, 'linewidth', 1.5);
             end
         end
+
+        function f = auto_signal_GUI()
+            f = figure;
+
+            
+
+            function callback(~,~)
+            end
+
+            function reset(~,~)
+            end
+
+            function update_figure(f)
+            end
+        end
+
     end
 
     methods (Access = private)
