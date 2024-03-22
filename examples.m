@@ -44,6 +44,10 @@ minpts = 10;
 frac = 0.03;
 f6 = d.auto_signal(numcomponents, epsilon, minpts, frac)
 
+%% Auto-detect ROI with GUI
+
+
+
 %% Construct an xdscode `geometry` struct, load an angle scan, and map it into reciprocal space
 
 % The following several lines construct a geometry structure from the
