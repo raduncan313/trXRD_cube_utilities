@@ -556,15 +556,17 @@ classdef Cube < handle
 
         function [inds_clsts, sigs_clsts] = auto_signal(obj, numcomponents, epsilon, minpts, frac)
             sz = size(obj.on.imgs);
+            off_flat = reshape(obj.off.imgs, [], sz(3));
+            mean_off = mean(off_flat, 2);
+            std_off = std(off_flat, 0, 2);
+
             on_flat = reshape(obj.on.imgs, [], sz(3));
             on_flat_sc = reshape(obj.on.imgs, [], sz(3));
             mean_on = mean(on_flat_sc, 2);
             std_on = std(on_flat_sc, 0, 2);
-            on_flat_sc = (on_flat_sc - mean_on)./std_on;
+            on_flat_sc = (on_flat_sc - mean_off)./std_off;
             on_flat_sc(isnan(on_flat_sc)) = 0;
             on_flat_sc(isinf(on_flat_sc)) = 0;
-
-            off_flat = reshape(obj.off.imgs, [], sz(3));
 
             [~, X_on, ~] = pca(on_flat_sc, 'NumComponents', numcomponents);
 
