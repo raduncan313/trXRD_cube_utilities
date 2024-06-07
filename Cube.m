@@ -1,4 +1,4 @@
-classdef Cube < handle
+classdef Cube < matlab.mixin.Copyable
     properties
         on = struct();
         off = struct();
@@ -439,7 +439,8 @@ classdef Cube < handle
                 
             end
             obj.hkl_scatter = hkl_scatter_0(1:p-1,:);
-            f = scatter3(obj.hkl_scatter(:,1),obj.hkl_scatter(:,2),...
+            f = figure
+            scatter3(obj.hkl_scatter(:,1),obj.hkl_scatter(:,2),...
                 obj.hkl_scatter(:,3),...
                 10*ones(length(obj.hkl_scatter(:,1)),1),...
                 obj.hkl_scatter(:,5),'filled');
